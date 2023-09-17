@@ -1,0 +1,7 @@
+name: FirestoreSK
+version: '${project.version}'
+main: dev.grcq.firestoresk.FirestoreSK
+author: grcq
+website: https://znci.dev/
+depend:
+  - Skript
