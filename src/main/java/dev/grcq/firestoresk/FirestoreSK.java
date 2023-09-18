@@ -9,16 +9,26 @@ Unless required by applicable law or agreed to in writing, software distributed 
 package dev.grcq.firestoresk;
 
 
+import ch.njol.skript.Skript;
+import ch.njol.skript.SkriptAddon;
 import dev.grcq.firestoresk.elements.ElementHandler;
+import dev.grcq.firestoresk.elements.effects.FirebaseInitEffect;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class FirestoreSK extends JavaPlugin {
+
+    private SkriptAddon addon;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
 
+        this.addon = Skript.registerAddon(this);
+
         ElementHandler elementHandler = new ElementHandler();
+        elementHandler.registerEffects(
+                new FirebaseInitEffect()
+        );
     }
 
     @Override

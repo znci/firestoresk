@@ -10,6 +10,7 @@ package dev.grcq.firestoresk.elements;
 
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.Statement;
 import ch.njol.skript.lang.util.SimpleExpression;
@@ -35,6 +36,21 @@ public class ElementHandler {
         }
 
         Skript.registerExpression(expression.getClass(), expression.getReturnType(), type.value(), pattern.value());
+    }
+
+    public void registerEffects(Effect... effects) {
+        for (Effect effect : effects) {
+            registerEffect(effect);
+        }
+    }
+
+    public void registerEffect(Effect effect) {
+        SkPattern pattern = effect.getClass().getDeclaredAnnotation(SkPattern.class);
+        if (pattern == null) {
+            throw new RuntimeException("Could not find '@SkPattern' annotation on " + effect.getClass().getName());
+        }
+
+        Skript.registerEffect(effect.getClass(), pattern.value());
     }
 
 }
