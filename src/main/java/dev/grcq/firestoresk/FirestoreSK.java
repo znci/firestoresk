@@ -11,17 +11,50 @@ package dev.grcq.firestoresk;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.LongSerializationPolicy;
 import dev.grcq.firestoresk.elements.ElementHandler;
 import dev.grcq.firestoresk.elements.effects.FirebaseInitEffect;
+import dev.grcq.firestoresk.elements.expressions.FirebaseGetDataExpr;
+import dev.grcq.firestoresk.firebase.Firebase;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public final class FirestoreSK extends JavaPlugin {
 
+    public static Gson GSON = new GsonBuilder()
+            .setLongSerializationPolicy(LongSerializationPolicy.STRING)
+            .setPrettyPrinting()
+            .create();
+
+    @Getter
+    private static FirestoreSK instance;
+
+    @Getter
     private SkriptAddon addon;
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
+        instance = this;
+
+        if (!getDataFolder().exists()) getDataFolder().mkdir();
+        File serviceAccountFile = new File(getDataFolder(), "serviceAccount.json");
+        if (!serviceAccountFile.exists()) {
+            try {
+                serviceAccountFile.createNewFile();
+                FileWriter writer = new FileWriter(serviceAccountFile);
+                writer.write(GSON.toJson(Firebase.getServiceAccountFileFormat()));
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         this.addon = Skript.registerAddon(this);
 
@@ -29,10 +62,12 @@ public final class FirestoreSK extends JavaPlugin {
         elementHandler.registerEffects(
                 new FirebaseInitEffect()
         );
+        elementHandler.registerExpression(
+                new FirebaseGetDataExpr()
+        );
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
     }
 }

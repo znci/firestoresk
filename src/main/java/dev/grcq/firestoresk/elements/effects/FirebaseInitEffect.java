@@ -24,23 +24,25 @@ import com.google.gson.JsonParser;
 import dev.grcq.firestoresk.annotations.SkPattern;
 import dev.grcq.firestoresk.firebase.Firebase;
 import org.bukkit.event.Event;
-import org.bukkit.event.server.ServerLoadEvent;
+
+import java.io.IOException;
 
 @Name("Firebase Init")
 @Description("Initialise firebase to be ready for use.")
 @Examples({
         "on script load:",
-        "init firestore using access token \"token\""
+        "set {_url} to \"url\"",
+        "init firestore with url {_url}"
 })
 @Since("2.7.0")
-@SkPattern("(init|authenticate) firestore (with|using) [access] token %string% [with scopes %strings%] [and expiry %date%]")
+@SkPattern("(init|initialise|initialize) firestore with url %string%")
 public class FirebaseInitEffect extends Effect {
 
-    private Expression<String> accessToken;
+    private Expression<String> url;
 
     @Override
     public boolean init(Expression<?>[] expressions, int i, Kleenean kleenean, SkriptParser.ParseResult parseResult) {
-        accessToken = (Expression<String>) expressions[0];
+        url = (Expression<String>) expressions[0];
         return true;
     }
 
@@ -51,8 +53,10 @@ public class FirebaseInitEffect extends Effect {
 
     @Override
     protected void execute(Event event) {
-        //if ((event instanceof EvtScript))
-
-        new Firebase(accessToken.getSingle(event));
+        try {
+            new Firebase(url.getSingle(event));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

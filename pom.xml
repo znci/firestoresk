@@ -42,6 +42,21 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <excludeScope>system</excludeScope>
+                                <excludes>META-INF/*.SF</excludes>
+                                <excludes>META-INF/*.DSA</excludes>
+                                <excludes>META-INF/*.RSA</excludes>
+                                <excludeGroupIds>junit,org.mockito,org.hamcrest</excludeGroupIds>
+                                <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
@@ -84,7 +99,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.14.8</version>
+            <version>1.18.28</version>
         </dependency>
         <dependency>
             <groupId>com.google.firebase</groupId>
