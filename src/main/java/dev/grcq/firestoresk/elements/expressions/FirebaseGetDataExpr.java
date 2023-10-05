@@ -11,6 +11,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QuerySnapshot;
 import com.google.common.reflect.TypeToken;
 import dev.grcq.firestoresk.annotations.ExprType;
 import dev.grcq.firestoresk.annotations.SkPattern;
@@ -51,6 +52,10 @@ public class FirebaseGetDataExpr extends SimpleExpression<Object> {
         ApiFuture<DocumentSnapshot> future = documentReference.get();
         try {
             DocumentSnapshot documentSnapshot = future.get();
+            if (!documentSnapshot.exists()) {
+                return new Object[0];
+            }
+
             return new Object[] {documentSnapshot.getData()};
         } catch (InterruptedException | ExecutionException e) {
             return null;

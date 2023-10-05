@@ -18,7 +18,10 @@ import dev.grcq.firestoresk.elements.ElementHandler;
 import dev.grcq.firestoresk.elements.effects.FirebaseInitEffect;
 import dev.grcq.firestoresk.elements.expressions.FirebaseGetDataExpr;
 import dev.grcq.firestoresk.firebase.Firebase;
+import io.grpc.LoadBalancerRegistry;
+import io.grpc.internal.PickFirstLoadBalancerProvider;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -56,6 +59,8 @@ public final class FirestoreSK extends JavaPlugin {
             }
         }
 
+        LoadBalancerRegistry.getDefaultRegistry().register(new PickFirstLoadBalancerProvider());
+
         this.addon = Skript.registerAddon(this);
 
         ElementHandler elementHandler = new ElementHandler();
@@ -67,7 +72,13 @@ public final class FirestoreSK extends JavaPlugin {
         );
     }
 
+    @SneakyThrows
     @Override
     public void onDisable() {
+        if (Firebase.getInstance() != null) {
+            Firebase firebase = Firebase.getInstance();
+            firebase.getFirestore().close();
+            firebase.getApp().delete();
+        }
     }
 }
