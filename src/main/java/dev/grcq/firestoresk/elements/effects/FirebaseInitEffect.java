@@ -18,14 +18,20 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import dev.grcq.firestoresk.FirestoreSK;
 import dev.grcq.firestoresk.annotations.SkPattern;
 import dev.grcq.firestoresk.firebase.Firebase;
 import org.bukkit.event.Event;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 @Name("Firebase Init")
 @Description("Initialise firebase to be ready for use.")
@@ -54,7 +60,13 @@ public class FirebaseInitEffect extends Effect {
     @Override
     protected void execute(Event event) {
         try {
-            new Firebase(url.getSingle(event));
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setCredentials(GoogleCredentials.fromStream(
+                            Files.newInputStream(new File(FirestoreSK.getInstance().getDataFolder(), "serviceAccount.json").toPath())
+                    ))
+                    .build();
+
+            FirebaseApp.initializeApp(options);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

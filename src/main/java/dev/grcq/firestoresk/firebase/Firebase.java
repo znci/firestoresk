@@ -4,12 +4,15 @@ import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.cloud.firestore.v1.FirestoreSettings;
+import com.google.common.collect.ImmutableMap;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.protobuf.LazyStringArrayList;
 import dev.grcq.firestoresk.FirestoreSK;
 import lombok.Getter;
 
@@ -19,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 
+@Deprecated
 public class Firebase {
 
     @Getter
@@ -49,38 +53,31 @@ public class Firebase {
     }
 
     public Firebase(String url, String projectId) throws IOException {
-        FirestoreSK.getInstance().getLogger().severe("111");
         try {
             if (instance != null) {
-                FirestoreSK.getInstance().getLogger().severe("222");
-                instance.getFirestore().close();
-                FirestoreSK.getInstance().getLogger().severe("333");
                 instance.getApp().delete();
             }
         } catch (Exception ignored) {}
 
-        FirestoreSK.getInstance().getLogger().severe("4");
         setInstance(this);
 
-        FirestoreSK.getInstance().getLogger().severe("a");
         File file = new File(FirestoreSK.getInstance().getDataFolder(), "serviceAccount.json");
-        FirestoreSK.getInstance().getLogger().severe("b");
-        GoogleCredentials credentials = GoogleCredentials.fromStream(Files.newInputStream(file.toPath()));
-        FirestoreSK.getInstance().getLogger().severe("c");
-        FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredentials(credentials)
-                .build();
 
         try {
-            FirestoreSK.getInstance().getLogger().severe("d");
-            this.app = FirebaseApp.initializeApp(options);
-            FirestoreSK.getInstance().getLogger().severe("e");
+            GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(file));
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setCredentials(credentials)
+                    .build();
+
+            FirebaseApp.initializeApp(options);
             this.firestore = FirestoreClient.getFirestore();
-            FirestoreSK.getInstance().getLogger().severe("f");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        if (this.firestore == null) {
+            FirestoreSK.getInstance().getLogger().severe("Firestore initialization failed!");
+        }
     }
 
     public static Firebase getInstance() {

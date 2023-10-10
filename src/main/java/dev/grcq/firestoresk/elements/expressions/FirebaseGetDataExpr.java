@@ -13,6 +13,8 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.common.reflect.TypeToken;
+import com.google.firebase.cloud.FirestoreClient;
+import com.google.firebase.database.FirebaseDatabase;
 import dev.grcq.firestoresk.annotations.ExprType;
 import dev.grcq.firestoresk.annotations.SkPattern;
 import dev.grcq.firestoresk.firebase.Firebase;
@@ -41,7 +43,7 @@ public class FirebaseGetDataExpr extends SimpleExpression<Object> {
 
     @Override
     protected Object[] get(Event event) {
-        Firestore firestore = Firebase.getInstance().getFirestore();
+        Firestore firestore = FirestoreClient.getFirestore();
 
         String collection = this.collection.getSingle(event);
         String document = this.document.getSingle(event);
