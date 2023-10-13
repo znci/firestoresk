@@ -65,6 +65,9 @@ public class FirebaseInitEffect extends Effect {
                             Files.newInputStream(new File(FirestoreSK.getInstance().getDataFolder(), "serviceAccount.json").toPath())
                     ))
                     .build();
+            try {
+                FirebaseApp.getInstance(FirebaseApp.DEFAULT_APP_NAME).delete();
+            } catch (Exception ignored) {}
 
             FirebaseApp.initializeApp(options);
         } catch (Exception e) {

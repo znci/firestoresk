@@ -15,6 +15,9 @@ import com.google.cloud.firestore.QuerySnapshot;
 import com.google.common.reflect.TypeToken;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import dev.grcq.firestoresk.FirestoreSK;
 import dev.grcq.firestoresk.annotations.ExprType;
 import dev.grcq.firestoresk.annotations.SkPattern;
 import dev.grcq.firestoresk.firebase.Firebase;
@@ -28,7 +31,7 @@ import java.util.concurrent.ExecutionException;
 @Since("2.7.0")
 @SkPattern("[firestore] [(get|fetch)] data from [the] document %string% in [collection] %string%")
 @ExprType(ExpressionType.COMBINED)
-public class FirebaseGetDataExpr extends SimpleExpression<Object> {
+public class FirebaseGetDataExpr extends SimpleExpression<JsonElement> {
 
     private Expression<String> document;
     private Expression<String> collection;
@@ -42,23 +45,24 @@ public class FirebaseGetDataExpr extends SimpleExpression<Object> {
 
 
     @Override
-    protected Object[] get(Event event) {
+    protected JsonElement[] get(Event event) {
         Firestore firestore = FirestoreClient.getFirestore();
 
         String collection = this.collection.getSingle(event);
         String document = this.document.getSingle(event);
 
-        if (collection == null || document == null) return new Object[0];
+        if (collection == null || document == null) return new JsonElement[0];
 
         DocumentReference documentReference = firestore.collection(collection).document(document);
         ApiFuture<DocumentSnapshot> future = documentReference.get();
         try {
             DocumentSnapshot documentSnapshot = future.get();
             if (!documentSnapshot.exists()) {
-                return new Object[0];
+                return new JsonElement[0];
             }
 
-            return new Object[] {documentSnapshot.getData()};
+            Gson gson = FirestoreSK.GSON;
+            return new JsonElement[] {gson.toJsonTree(documentSnapshot.getData())};
         } catch (InterruptedException | ExecutionException e) {
             return null;
         }
@@ -70,8 +74,8 @@ public class FirebaseGetDataExpr extends SimpleExpression<Object> {
     }
 
     @Override
-    public Class<?> getReturnType() {
-        return Object.class;
+    public Class<? extends JsonElement> getReturnType() {
+        return JsonElement.class;
     }
 
     @Override

@@ -11,13 +11,18 @@ package dev.grcq.firestoresk;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
+import com.google.common.collect.ImmutableMap;
+import com.google.firebase.FirebaseApp;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.LongSerializationPolicy;
 import dev.grcq.firestoresk.elements.ElementHandler;
-import dev.grcq.firestoresk.elements.effects.FirebaseInitEffect;
+import dev.grcq.firestoresk.elements.effects.*;
+import dev.grcq.firestoresk.elements.expressions.FirebaseGetAllDataExpr;
 import dev.grcq.firestoresk.elements.expressions.FirebaseGetDataExpr;
+import dev.grcq.firestoresk.elements.expressions.FirebaseGetFromDataExpr;
 import dev.grcq.firestoresk.firebase.Firebase;
+import dev.grcq.firestoresk.utils.Types;
 import io.grpc.LoadBalancerRegistry;
 import io.grpc.internal.PickFirstLoadBalancerProvider;
 import lombok.Getter;
@@ -62,23 +67,28 @@ public final class FirestoreSK extends JavaPlugin {
         LoadBalancerRegistry.getDefaultRegistry().register(new PickFirstLoadBalancerProvider());
 
         this.addon = Skript.registerAddon(this);
+        Types.init();
 
         ElementHandler elementHandler = new ElementHandler();
         elementHandler.registerEffects(
-                new FirebaseInitEffect()
+                new FirebaseGetAllDataEffect(),
+                new FirebaseInitEffect(),
+                new FirebaseGetDataEffect(),
+                new FirebaseAddDataToVarEffect(),
+                new FirebaseAddDataEffect()
         );
-        elementHandler.registerExpression(
-                new FirebaseGetDataExpr()
+        elementHandler.registerExpressions(
+                //new FirebaseGetDataExpr(),
+                //new FirebaseGetAllDataExpr(),
+                //new FirebaseGetFromDataExpr()
         );
     }
 
     @SneakyThrows
     @Override
     public void onDisable() {
-        if (Firebase.getInstance() != null) {
-            Firebase firebase = Firebase.getInstance();
-            firebase.getFirestore().close();
-            firebase.getApp().delete();
-        }
+        try {
+            FirebaseApp.getInstance().delete();
+        } catch (Exception ignored) {}
     }
 }
